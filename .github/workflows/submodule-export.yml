@@ -52,12 +52,15 @@ jobs:
             rm -rf $line
           done < "$BLACKLIST"
 
-      - name: Commit Changes
+      - name: Commit Changes (if any)
         run: |
           git add -A
-          git commit -m "Submodule Export"
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Submodule Export"
+          fi
 
       - name: Push export branch
         run: |
           git push --set-upstream origin "$EXPORT_BRANCH" --force
-
