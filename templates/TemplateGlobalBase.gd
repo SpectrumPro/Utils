@@ -40,17 +40,20 @@ var _settings: SettingsManager
 func _init(p_uuid: String = UUID.v4(), ...p_args: Array[Variant]) -> void:
 	_uuid = p_uuid
 	_set_class_name("GlobalBaseClass")
+	
+	_settings.set_owner(self)
+	_settings.set_inheritance_array(_class_tree)
 
 
 ## Returns the user-defined name of this object.
-func get_name() -> String:
+func get_uname() -> String:
 	return _name
 
 
 ## Returns the UUID of this object.
 func get_uuid() -> String:
-
 	return _uuid
+
 
 ## Returns the class name of this object.
 func get_class_name() -> String:
@@ -68,11 +71,16 @@ func get_settings() -> SettingsManager:
 
 
 ## Sets the name of this object. If p_no_signal is true, the name_changed signal is not emitted.
-func set_name(p_name: String, p_no_signal: bool = false) -> void:
+func set_uname(p_name: String, p_no_signal: bool = false) -> void:
 	_name = p_name
 	
 	if not p_no_signal:
 		name_changed.emit(_name)
+
+
+## Emits the delete_requested signal to notify that this object should be deleted.
+func delete() -> void:
+	delete_requested.emit()
 
 
 ## Returns a JSON-compliant dictionary containing a serialized version of this object.
@@ -87,7 +95,7 @@ func serialize(p_flags: Data.SerializationFlags) -> Dictionary[String, Variant]:
 
 ## Deserializes data either read from disk or returned by serialize().
 func deserialize(p_serialized_data: Dictionary, p_flags: Data.SerializationFlags) -> void:
-	set_name(type_convert(p_serialized_data.get("name", _name), TYPE_STRING), true)
+	set_uname(type_convert(p_serialized_data.get("name", _name), TYPE_STRING), true)
 	
 	if not p_flags & Data.SerializationFlags.NO_UUID:
 		_uuid = type_convert(p_serialized_data.get("uuid", _uuid), TYPE_STRING)
