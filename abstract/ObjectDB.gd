@@ -35,7 +35,7 @@ var _component_requests: Dictionary = {}
 ## Registers a component in the database. Returns false if it already exists.
 ## p_component must be GBC-compliant.
 func register_component(p_component: Object) -> bool:
-	if p_component.get_uuid() in _components:
+	if not is_component_allowed(p_component) or p_component.get_uuid() in _components:
 		return false
 	
 	_components[p_component.get_uuid()] = p_component
@@ -61,7 +61,7 @@ func register_component(p_component: Object) -> bool:
 ## Deregisters a component from the database. Returns false if it does not exist.
 ## p_component must be GBC-compliant.
 func deregister_component(p_component: Object) -> bool:
-	if not p_component.get_uuid() in _components:
+	if not is_component_allowed(p_component) or not p_component.get_uuid() in _components:
 		return false
 	
 	for classname: String in p_component.get_class_tree():
@@ -86,10 +86,15 @@ func get_component(p_uuid: String) -> Object:
 
 ## Checks if the given component exists in the database. Not GBC-safe if the object lacks get_uuid().
 func has_component(p_component: Object) -> bool:
-	if not p_component.has_method("get_uuid"):
+	if not is_component_allowed(p_component):
 		return false
 	
 	return _components.has(p_component.get_uuid())
+
+
+## Returns true if the given component is allowed in this ObjectDB
+func is_component_allowed(p_component: Object) -> bool:
+	return p_component.has_method("get_uuid") 
 
 
 ## Registers a callback to be called once when a component with p_uuid is added.
