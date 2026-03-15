@@ -6,15 +6,6 @@ class_name SettingsManager extends RefCounted
 ## SettingsManager
 
 
-## Enum for NetworkFlags
-enum NetworkFlags {
-	NONE				= 0, ## No flags
-	ALLOW_SERIALIZE		= 1 << 0, ## Allows EngineComponents to be serialized on an outgoing message
-	ALLOW_DESERIALIZE	= 1 << 1, ## Allows EngineComponents to be deserialized on an incomming message
-	ALLOW_UNRESOLVED	= 1 << 2, ## Allows the EngineComponent's uuid to be passed instead of an object if it can't be resolved from ComponentDB
-}
-
-
 ## All entrys in this SettingsManager
 var _entrys: Dictionary[String, SettingsModule]
 
@@ -220,17 +211,17 @@ func get_networked_signals() -> Dictionary[String, Signal]:
 
 ## Gets NetworkFlags for the given callable
 func get_method_network_flags(p_method: String) -> int:
-	return _networked_method_flags.get(p_method, NetworkFlags.NONE)
+	return _networked_method_flags.get(p_method, Data.NetworkFlags.NONE)
 
 
 ## Gets NetworkFlags for the given callable
 func get_callback_network_flags(p_method: String) -> int:
-	return _networked_callback_flags.get(p_method, NetworkFlags.NONE)
+	return _networked_callback_flags.get(p_method, Data.NetworkFlags.NONE)
 
 
 ## Gets NetworkFlags for the given callable
 func get_signal_network_flags(p_signal: String) -> int:
-	return _networked_signal_flags.get(p_signal, NetworkFlags.NONE)
+	return _networked_signal_flags.get(p_signal, Data.NetworkFlags.NONE)
 
 
 ## Sets the owner
@@ -258,7 +249,7 @@ func set_method_allow_serialize(p_callable: Variant) -> void:
 	if p_callable is Callable:
 		p_callable = p_callable.get_method()
 	
-	set_method_network_flags(p_callable, NetworkFlags.ALLOW_SERIALIZE)
+	set_method_network_flags(p_callable, Data.NetworkFlags.ALLOW_SERIALIZE)
 
 
 ## Sets NetworkFlags.ALLOW_DESERIALIZE on the given callable
@@ -266,7 +257,7 @@ func set_method_allow_deserialize(p_callable: Variant) -> void:
 	if p_callable is Callable:
 		p_callable = p_callable.get_method()
 	
-	set_method_network_flags(p_callable, NetworkFlags.ALLOW_DESERIALIZE)
+	set_method_network_flags(p_callable, Data.NetworkFlags.ALLOW_DESERIALIZE)
 
 
 ## Sets NetworkFlags.ALLOW_UNRESOLVED on the given callable
@@ -274,7 +265,7 @@ func set_method_allow_unresolved(p_callable: Variant) -> void:
 	if p_callable is Callable:
 		p_callable = p_callable.get_method()
 	
-	set_method_network_flags(p_callable, NetworkFlags.ALLOW_UNRESOLVED)
+	set_method_network_flags(p_callable, Data.NetworkFlags.ALLOW_UNRESOLVED)
 
 
 ## Sets NetworkFlags on the given callable
@@ -287,7 +278,7 @@ func set_callback_allow_deserialize(p_callable: Variant) -> void:
 	if p_callable is Callable:
 		p_callable = p_callable.get_method()
 	
-	set_callback_network_flags(p_callable, NetworkFlags.ALLOW_DESERIALIZE)
+	set_callback_network_flags(p_callable, Data.NetworkFlags.ALLOW_DESERIALIZE)
 
 
 ## Sets NetworkFlags.ALLOW_UNRESOLVED on the given callable
@@ -295,7 +286,7 @@ func set_callback_allow_unresolved(p_callable: Variant) -> void:
 	if p_callable is Callable:
 		p_callable = p_callable.get_method()
 	
-	set_callback_network_flags(p_callable, NetworkFlags.ALLOW_UNRESOLVED)
+	set_callback_network_flags(p_callable, Data.NetworkFlags.ALLOW_UNRESOLVED)
 
 
 ## Sets NetworkFlags on the given callable
@@ -308,7 +299,7 @@ func set_signal_allow_serialize(p_signal: Variant) -> void:
 	if p_signal is Signal:
 		p_signal = p_signal.get_name()
 	
-	set_signal_network_flags(p_signal, NetworkFlags.ALLOW_SERIALIZE)
+	set_signal_network_flags(p_signal, Data.NetworkFlags.ALLOW_SERIALIZE)
 
 
 ## Notification

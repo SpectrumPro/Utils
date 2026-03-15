@@ -38,6 +38,23 @@ enum Type {
 }
 
 
+## Enum for SerializationFlags
+enum SerializationFlags {
+	NONE		= 0,		## No special behavior
+	REALTIME	= 1 << 0,	## Include normally unsaved realtime data (usefull for synchronizing)
+	NO_UUID		= 1 << 1,	## Exclude the object's unique UUID (useful for duplication)
+}
+
+
+## Enum for NetworkFlags
+enum NetworkFlags {
+	NONE				= 0,		## No special network behavior
+	ALLOW_SERIALIZE		= 1 << 0,	## Allow the object to be serialized in outgoing messages
+	ALLOW_DESERIALIZE	= 1 << 1,	## Allow the object to be deserialized from incoming messages
+	ALLOW_UNRESOLVED	= 1 << 2,	## Allow the object's UUID to be returned if the object can't be resolved
+};
+
+
 ## Map custom Type to Godot Variant.Type
 static var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.NULL: 				TYPE_NIL,
