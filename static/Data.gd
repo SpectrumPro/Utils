@@ -29,7 +29,6 @@ enum Type {
 	SIGNAL,				## A signal reference (connectable event)
 	ENUM,				## An enumerator
 	BITFLAGS,			## Bit Flags
-	NAME,				## A symbolic name or identifier 
 	IP,					## An IP address
 	INPUTEVENT,			## An InputEvent
 	SETTINGSMANAGER,	## A SettingsManager
@@ -78,7 +77,6 @@ static var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.SIGNAL: 			TYPE_SIGNAL,
 	Type.ENUM: 				TYPE_INT,
 	Type.BITFLAGS: 			TYPE_INT,
-	Type.NAME: 				TYPE_STRING,
 	Type.IP:				TYPE_STRING,
 	Type.INPUTEVENT:		TYPE_OBJECT,
 	Type.SETTINGSMANAGER:	TYPE_OBJECT,
