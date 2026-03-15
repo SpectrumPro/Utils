@@ -7,7 +7,7 @@ static var config: Dictionary[String, Variant] = {
 
 ## Converts a custom data type to a string, with a human readable name
 @warning_ignore("unused_parameter")
-static func custom_type_to_string(p_variant: String, p_orignal_type: Data.Type) -> Variant:
+static func custom_type_to_string(p_variant: Variant, p_orignal_type: Data.Type) -> Variant:
 	## return a String to override default convertion
 	# return "Value"
 

@@ -117,7 +117,7 @@ static func do_types_match_base(p_type_one: Type, p_type_two: Type) -> bool:
 
 
 ## Converts a custom data type to a string, with a human readable name
-static func custom_type_to_string(p_variant: String, p_orignal_type: Type) -> String:
+static func custom_type_to_string(p_variant: Variant, p_orignal_type: Type) -> String:
 	if _custom_type_to_string_method.is_valid():
 		var result: Variant = _custom_type_to_string_method.call(p_variant, p_orignal_type)
 		
