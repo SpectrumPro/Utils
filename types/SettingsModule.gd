@@ -33,6 +33,9 @@ var _name: String = ""
 ## DataType of this SettingsModule
 var _data_type: Data.Type = Data.Type.NULL
 
+## Data SubType of this SettingsModule
+var _sub_type: int = Data.Sub.Type.NULL
+
 ## Module Type
 var _type: Type = Type.NONE
 
@@ -137,6 +140,11 @@ func get_data_type() -> Data.Type:
 	return _data_type
 
 
+## Returns the Data SubType of this SettingsModule
+func get_sub_type() -> int:
+	return _sub_type
+
+
 ## Returns the type flags of this SettingsModule
 func get_type() -> int:
 	return _type
@@ -235,6 +243,12 @@ func get_visual_line() -> int:
 ## Gets the owner Object
 func get_owner() -> Object:
 	return _owner.get_ref()
+
+
+## Sets the SubType
+func set_sub_type(p_sub_type: int) -> SettingsModule:
+	_sub_type = p_sub_type
+	return self
 
 
 ## Sets the class filter

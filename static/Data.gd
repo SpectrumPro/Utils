@@ -36,6 +36,9 @@ enum Type {
 	ACTION,				## An Action that can be triggred
 }
 
+## Enum copy of DataConfig.Sub.Type
+static var Sub: DataConfig.SubType = DataConfig.SubType.new()
+
 
 ## Enum for SerializationFlags
 enum SerializationFlags {
@@ -43,7 +46,6 @@ enum SerializationFlags {
 	REALTIME	= 1 << 0,	## Include normally unsaved realtime data (usefull for synchronizing)
 	NO_UUID		= 1 << 1,	## Exclude the object's unique UUID (useful for duplication)
 }
-
 
 ## Enum for NetworkFlags
 enum NetworkFlags {

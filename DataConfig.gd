@@ -1,3 +1,13 @@
+# class_name DataConfig extends Object
+
+
+## Class to store SubType keys
+class SubType:
+	enum Type {
+		NULL,						## No Type
+	}
+
+
 ## Config for Data
 static var config: Dictionary[String, Variant] = {
 	"custom_type_to_string_method": custom_type_to_string,
