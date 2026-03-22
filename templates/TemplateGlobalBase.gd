@@ -60,6 +60,11 @@ func get_class_name() -> String:
 	return _class_name
 
 
+## Returns the base class of this object
+func get_base_class() -> String:
+	return _class_tree[-1]
+
+
 ## Returns a copy of the inheritance tree for this object.
 func get_class_tree() -> Array[String]:
 	return _class_tree.duplicate()

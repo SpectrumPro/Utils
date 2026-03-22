@@ -96,6 +96,9 @@ static var _custom_type_to_string_method: Callable
 ## User config method to get a name changed signal from an object
 static var _get_object_name_signal_method: Callable
 
+## User config method to get the ObjectDB for a object
+static var _get_object_db_method: Callable
+
 
 ## static init
 static func _static_init() -> void:
@@ -106,6 +109,7 @@ static func _static_init() -> void:
 		
 		_custom_type_to_string_method = type_convert(_config.get("custom_type_to_string_method"), TYPE_CALLABLE)
 		_get_object_name_signal_method = type_convert(_config.get("get_object_name_signal_method"), TYPE_CALLABLE)
+		_get_object_db_method = type_convert(_config.get("get_object_db_method"), TYPE_CALLABLE)
 
 
 ## Returns true if the 2 given types have a matching Variant.Type base
@@ -143,3 +147,12 @@ static func get_object_name_changed_signal(p_module: SettingsModule) -> Signal:
 		return (object as Node).renamed
 	
 	return Signal()
+
+
+## Returns the ObjectDB that p_object's type belongs to
+static func get_object_db(p_object: Object) -> ObjectDB:
+	if _get_object_name_signal_method.is_valid():
+		return _get_object_name_signal_method.call(p_object)
+	else:
+		return null
+	
