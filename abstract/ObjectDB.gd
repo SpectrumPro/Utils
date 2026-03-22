@@ -13,23 +13,30 @@ signal component_added(p_component: Object)
 signal component_removed(p_component: Object)
 
 
+## Stores all components by their UUID. for all instances of ObjectDB
+static var _static_components: Dictionary[String, Object]
+
+## Stores all static component request, requests that work accross any instance of ObjectDB
+static var _static_requests: Dictionary[String, Array]
+
+
 ## Stores all components by their UUID.
-var _components: Dictionary = {}
+var _components: Dictionary[String, Object]
 
 ## Stores all components grouped by their class name.
-var _components_by_classname: Dictionary = {}
+var _components_by_classname: Dictionary[String, Array]
+
+## Stores pending component requests by UUID.
+var _component_requests: Dictionary[String, Array]
 
 ## Stores all class-level callback signals.
-var _class_callbacks: Dictionary = {}
+var _class_callbacks: Dictionary[String, Array]
 
 ## Temporarily stores components that were added or removed, allowing batch emission of class callbacks.
-var _just_changed_components: Dictionary = {}
+var _just_changed_components: Dictionary[String, Dictionary]
 
 ## True if _emit_class_callbacks is queued to run at the end of this frame.
 var _emit_class_callbacks_queued: bool = false
-
-## Stores pending component requests by UUID.
-var _component_requests: Dictionary = {}
 
 
 ## Registers a component in the database. Returns false if it already exists.
@@ -39,22 +46,19 @@ func register_component(p_component: Object) -> bool:
 		return false
 	
 	_components[p_component.get_uuid()] = p_component
+	_static_components[p_component.get_uuid()] = p_component
 	
 	for classname: String in p_component.get_class_tree():
 		if not classname in _components_by_classname:
 			_components_by_classname[classname] = []
 		_components_by_classname[classname].append(p_component)
 	
-	if p_component.get_uuid() in _component_requests:
-		for callback: Callable in _component_requests[p_component.get_uuid()].duplicate():
-			if callback.is_valid(): 
-				callback.call(p_component)
-		_component_requests.erase(p_component.get_uuid())
-	
+	_check_component_requests(p_component)
 	_check_class_callbacks(p_component)
-	p_component.delete_requested.connect(deregister_component.bind(p_component), CONNECT_ONE_SHOT)
 	
+	p_component.delete_requested.connect(deregister_component.bind(p_component), CONNECT_ONE_SHOT)
 	component_added.emit(p_component)
+	
 	return true
 
 
@@ -110,6 +114,19 @@ func request_component(p_uuid: String, p_callback: Callable) -> void:
 		_component_requests[p_uuid].append(p_callback)
 
 
+## Registers a static callback to be called once when a component with p_uuid is added. Works accross any instance of ObjectDB
+static func request_component_static(p_uuid: String, p_callback: Callable) -> void:
+	if not p_uuid:
+		return
+	
+	if p_uuid in _static_components:
+		p_callback.call(_static_components[p_uuid])
+	else:
+		if not p_uuid in _static_requests:
+			_static_requests[p_uuid] = []
+		_static_requests[p_uuid].append(p_callback)
+
+
 ## Removes a previously registered component request.
 func remove_request(p_uuid: String, p_callback: Callable) -> void:
 	if p_uuid in _component_requests and p_callback in _component_requests[p_uuid]:
@@ -117,6 +134,15 @@ func remove_request(p_uuid: String, p_callback: Callable) -> void:
 		
 		if not _component_requests[p_uuid]:
 			_component_requests.erase(p_uuid)
+
+
+## Removes a previously registered component request. Works accross any instance of ObjectDB
+static func remove_request_static(p_uuid: String, p_callback: Callable) -> void:
+	if p_uuid in _static_requests and p_callback in _static_requests[p_uuid]:
+		_static_requests[p_uuid].erase(p_callback)
+		
+		if not _static_requests[p_uuid]:
+			_static_requests.erase(p_uuid)
 
 
 ## Registers a callback to be called whenever a component matching p_classname is added.
@@ -136,8 +162,19 @@ func remove_class_callback(p_classname: String, p_callback: Callable) -> void:
 
 ## Resets all class callbacks and clears the queue.
 func reset_callbacks() -> void:
-	_just_changed_components = {}
+	_just_changed_components.clear()
 	_emit_class_callbacks_queued = false
+
+
+## Checks both static and local component requests and calls callbacks if needed
+func _check_component_requests(p_component: Object) -> void:
+	for requests: Dictionary[String, Array] in [_static_requests, _component_requests]: 
+		if p_component.get_uuid() in requests:
+			for callback: Callable in requests[p_component.get_uuid()].duplicate():
+				if callback.is_valid(): 
+					callback.call(p_component)
+			
+			requests.erase(p_component.get_uuid())
 
 
 ## Internal method to check and queue class callbacks for p_component.
@@ -171,5 +208,5 @@ func _emit_class_callbacks() -> void:
 				else:
 					_class_callbacks[classname].erase(callback)
 	
-	_just_changed_components = {}
+	_just_changed_components.clear()
 	_emit_class_callbacks_queued = false
