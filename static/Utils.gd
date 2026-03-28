@@ -181,6 +181,7 @@ static func _split_sort_key(s: String) -> Array:
 	var parts: Array = []
 	for match in regex.search_all(s):
 		var sub = match.get_string()
+		@warning_ignore("incompatible_ternary")
 		parts.append(int(sub) if sub.is_valid_int() else sub)
 	
 	return parts
@@ -193,3 +194,16 @@ static func array_move_to_start(arr: Array, item) -> Array:
 		arr.remove_at(i)
 		arr.insert(0, item)
 	return arr
+
+
+## Recursively merges two dictionaries
+static func merge_deep(base: Dictionary, override: Dictionary) -> Dictionary:
+	var result: Dictionary = base
+	
+	for key: Variant in override:
+		if result.has(key) and result[key] is Dictionary and override[key] is Dictionary:
+			result[key] = merge_deep(result[key], override[key])
+		else:
+			result[key] = override[key]
+	
+	return result
