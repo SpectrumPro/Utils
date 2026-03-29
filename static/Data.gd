@@ -9,6 +9,7 @@ class_name Data extends Object
 ## Enum for Type
 enum Type {
 	NULL,				## Represents no value (null / None)
+	ANY,				## Represents a Variant any type
 	STRING,				## A standard text string
 	BOOL,				## A true/false boolean value
 	INT,				## A 64-bit integer number
@@ -59,6 +60,7 @@ enum NetworkFlags {
 ## Map custom Type to Godot Variant.Type
 static var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.NULL: 				TYPE_NIL,
+	Type.ANY:				TYPE_MAX,
 	Type.STRING:			TYPE_STRING,
 	Type.BOOL: 				TYPE_BOOL,
 	Type.INT: 				TYPE_INT,
