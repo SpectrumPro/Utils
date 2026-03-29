@@ -201,8 +201,14 @@ static func merge_deep(base: Dictionary, override: Dictionary) -> Dictionary:
 	var result: Dictionary = base
 	
 	for key: Variant in override:
-		if result.has(key) and result[key] is Dictionary and override[key] is Dictionary:
-			result[key] = merge_deep(result[key], override[key])
+		if result.has(key):
+			if result[key] is Dictionary and override[key] is Dictionary:
+				result[key] = merge_deep(result[key], override[key])
+			elif result[key] is Array and override[key] is Array:
+				result[key] = result[key] + override[key]
+			else:
+				result[key] = override[key]
+			
 		else:
 			result[key] = override[key]
 	
