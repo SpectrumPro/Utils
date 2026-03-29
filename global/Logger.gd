@@ -57,13 +57,11 @@ func _init() -> void:
 		var name_index: int = cli_args.find("--remote-logs") + 1
 		var port: int = int(cli_args[name_index])
 		add_remote("127.0.0.1", port, -1)
-	
-	add_remote("127.0.0.1", 5555, -1)
 
 
 ## process
-func _process(delta: float) -> void:
-	while _udp_socket.get_available_packet_count():
+func _process(_p_delta: float) -> void:
+	while _udp_socket.get_available_packet_count() > 0:
 		var message: String = _udp_socket.get_packet().get_string_from_ascii()
 		
 		match message:
