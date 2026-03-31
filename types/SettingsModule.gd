@@ -51,6 +51,9 @@ var _signals: Array[Signal] = []
 ## A filter for when using any data type of object
 var _class_filter: Script = null
 
+## The base class when using any data type of object
+var _base_class: Script = null
+
 ## The Enum dictionary when using DataType.ENUM
 var _enum_dict: Dictionary
 
@@ -170,6 +173,11 @@ func get_class_filter() -> Script:
 	return _class_filter
 
 
+## Returns the class filter
+func get_base_class() -> Script:
+	return _base_class
+
+
 ## Gets the enum dict
 func get_enum_dict() -> Dictionary:
 	return _enum_dict
@@ -252,7 +260,8 @@ func set_sub_type(p_sub_type: int) -> SettingsModule:
 
 
 ## Sets the class filter
-func set_class_filter(p_class_filter: Script) -> SettingsModule:
+func set_class_filter(p_base_class: Script, p_class_filter: Script) -> SettingsModule:
+	_base_class = p_base_class
 	_class_filter = p_class_filter
 	return self
 
