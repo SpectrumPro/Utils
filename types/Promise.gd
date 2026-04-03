@@ -41,6 +41,9 @@ var _created_at: float = Time.get_unix_time_from_system()
 ## Resolves the promise and calls all registered `then()` callbacks
 func resolve(args: Array = []) -> void:
 	for method: Callable in _resolved_methods:
+		if method.is_null():
+			continue
+		
 		if not method.get_argument_count():
 			method.call()
 		else:
@@ -56,6 +59,9 @@ func resolvev(...args) -> void:
 ## Rejects the promise and calls all registered `catch()` callbacks
 func reject(args: Array = []) -> void:
 	for method: Callable in _rejected_methods:
+		if method.is_null():
+			continue
+		
 		if not method.get_argument_count():
 			method.call()
 		else:
