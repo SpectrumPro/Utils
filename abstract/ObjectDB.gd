@@ -88,6 +88,11 @@ func get_component(p_uuid: String) -> Object:
 	return _components.get(p_uuid)
 
 
+## Returns all components in this ObjectDB
+func get_components() -> Array:
+	return _components.values()
+
+
 ## Checks if the given component exists in the database. Not GBC-safe if the object lacks get_uuid().
 func has_component(p_component: Object) -> bool:
 	if not is_component_allowed(p_component):
