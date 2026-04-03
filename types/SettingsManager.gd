@@ -9,6 +9,9 @@ class_name SettingsManager extends RefCounted
 ## All entrys in this SettingsManager
 var _entrys: Dictionary[String, SettingsModule]
 
+## All ChildManagers in this SettingManager, store by ID
+var _child_managers: Dictionary[String, ChildManager]
+
 ## The owner Object
 var _owner: WeakRef = null
 
@@ -111,6 +114,18 @@ func require(p_id: String, p_manager: SettingsManager) -> SettingsModule:
 	return module
 
 
+## Creates a new ChildManager with the given ID
+func add_child_manager(p_id: String, p_manager: ChildManager) -> bool:
+	if p_manager.get_settings_manager():
+		return false
+	
+	p_manager._set_settings_manager(self)
+	p_manager._set_id(p_id)
+	
+	_child_managers[p_id] = p_manager
+	return true
+
+
 ## Registers a networked method, auto sets the method name from the Callable
 func register_networked_methods_auto(p_methods: Array[Callable]) -> void:
 	for method: Callable in p_methods:
@@ -149,9 +164,19 @@ func get_entry(p_id: String) -> SettingsModule:
 	return _entrys.get(p_id, null)
 
 
+## Gets a ChildManager by ID
+func get_child_manager(p_id: String) -> ChildManager:
+	return _child_managers.get(p_id, null)
+
+
 ## Gets all the SettingsModules
 func get_modules() -> Dictionary[String, SettingsModule]:
 	return _entrys.duplicate()
+
+
+## Returns all ChildManagers
+func get_child_managers() -> Dictionary[String, ChildManager]:
+	return _child_managers.duplicate()
 
 
 ## Gets the owner of this SettingsManager
@@ -300,6 +325,11 @@ func set_signal_allow_serialize(p_signal: Variant) -> void:
 		p_signal = p_signal.get_name()
 	
 	set_signal_network_flags(p_signal, Data.NetworkFlags.ALLOW_SERIALIZE)
+
+
+## Returns true if this SettingsManager has a given ChildManager
+func has_child_manager(p_manager: ChildManager) -> bool: 
+	return _child_managers.has(p_manager.get_id()) and _child_managers[p_manager.get_id()] == p_manager
 
 
 ## Notification
