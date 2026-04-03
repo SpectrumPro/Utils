@@ -13,6 +13,9 @@ static var config: Dictionary[String, Variant] = {
 	"custom_type_to_string_method": custom_type_to_string,
 	"get_object_name_signal_method": get_object_name_changed_signal,
 	"get_object_db": get_object_db,
+	"gbc_index": {
+		#"ClassName": GBCIndexConfig.new(Script, ObjectDB, ClassListDB, ChildManager)
+	}
 }
 
 

@@ -2,7 +2,7 @@
 # This file is part of the Spectrum Lighting Engine, licensed under the GPL v3.0 or later.
 # See the LICENSE file for details.
 
-class_name Data extends Object
+class_name CoreData extends Node
 ## Class to manage custom data types
 
 
@@ -58,7 +58,7 @@ enum NetworkFlags {
 
 
 ## Map custom Type to Godot Variant.Type
-static var custom_type_map: Dictionary[Type, Variant.Type] = {
+var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.NULL: 				TYPE_NIL,
 	Type.ANY:				TYPE_MAX,
 	Type.STRING:			TYPE_STRING,
@@ -81,7 +81,7 @@ static var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.SIGNAL: 			TYPE_SIGNAL,
 	Type.ENUM: 				TYPE_INT,
 	Type.BITFLAGS: 			TYPE_INT,
-	Type.IP:				TYPE_STRING,
+	Type.IP:				TYPE_OBJECT,
 	Type.INPUTEVENT:		TYPE_OBJECT,
 	Type.SETTINGSMANAGER:	TYPE_OBJECT,
 	Type.PACKEDSCENE:		TYPE_OBJECT,
@@ -90,20 +90,23 @@ static var custom_type_map: Dictionary[Type, Variant.Type] = {
 
 
 ## User config
-static var _config: Dictionary[String, Variant]
+var _config: Dictionary[String, Variant]
 
 ## User config method to convert a custom type into a string
-static var _custom_type_to_string_method: Callable
+var _custom_type_to_string_method: Callable
 
 ## User config method to get a name changed signal from an object
-static var _get_object_name_signal_method: Callable
+var _get_object_name_signal_method: Callable
 
 ## User config method to get the ObjectDB for a object
-static var _get_object_db_method: Callable
+var _get_object_db_method: Callable
+
+## User config Dictionary for storeing GBCIndexConfig for each GBC complient class
+var _gbc_index: Dictionary[String, GBCIndexConfig]
 
 
 ## static init
-static func _static_init() -> void:
+func _init() -> void:
 	var script: Variant = load("res://DataConfig.gd")
 	
 	if script is GDScript and script.get("config") is Dictionary:
@@ -115,7 +118,7 @@ static func _static_init() -> void:
 
 
 ## Returns true if the 2 given types have a matching Variant.Type base
-static func do_types_match_base(p_type_one: Type, p_type_two: Type) -> bool:
+func do_types_match_base(p_type_one: Type, p_type_two: Type) -> bool:
 	var type_one_base: Variant.Type = custom_type_map[p_type_one]
 	var type_two_base: Variant.Type = custom_type_map[p_type_two]
 	
@@ -123,7 +126,7 @@ static func do_types_match_base(p_type_one: Type, p_type_two: Type) -> bool:
 
 
 ## Converts a custom data type to a string, with a human readable name
-static func custom_type_to_string(p_variant: Variant, p_orignal_type: Type) -> String:
+func custom_type_to_string(p_variant: Variant, p_orignal_type: Type) -> String:
 	if _custom_type_to_string_method.is_valid():
 		var result: Variant = _custom_type_to_string_method.call(p_variant, p_orignal_type)
 		
@@ -134,7 +137,7 @@ static func custom_type_to_string(p_variant: Variant, p_orignal_type: Type) -> S
 
 
 ## Returns the signal emitted when the name of an object is changed
-static func get_object_name_changed_signal(p_module: SettingsModule) -> Signal:
+func get_object_name_changed_signal(p_module: SettingsModule) -> Signal:
 	if _get_object_name_signal_method.is_valid():
 		var result: Variant = _get_object_name_signal_method.call(p_module)
 		
@@ -151,10 +154,30 @@ static func get_object_name_changed_signal(p_module: SettingsModule) -> Signal:
 	return Signal()
 
 
-## Returns the ObjectDB that p_object's type belongs to
-static func get_object_db(p_object: Object) -> ObjectDB:
-	if _get_object_name_signal_method.is_valid():
-		return _get_object_name_signal_method.call(p_object)
-	else:
-		return null
+## Returns the GBCIndexConfig for the given GBC class name, either a Script or String classname
+func get_gbc_config(p_gbc_class: Variant) -> GBCIndexConfig:
+	if p_gbc_class is Script:
+		p_gbc_class = p_gbc_class.get_global_name()
 	
+	p_gbc_class = type_convert(p_gbc_class, TYPE_STRING)
+	return _gbc_index.get(p_gbc_class, null)
+
+
+## Adds a GBC index 
+func add_gbc_index(p_index: GBCIndexConfig) -> void:
+	_gbc_index[p_index.get_base_class().get_global_name()] = p_index
+
+
+## Returns true if a GBCIndexConfig exists for the given GBC class name, either a Script or String classname 
+func has_gbc_config(p_gbc_class: Variant) -> bool:
+	if p_gbc_class is Script:
+		p_gbc_class = p_gbc_class.get_global_name()
+	
+	p_gbc_class = type_convert(p_gbc_class, TYPE_STRING)
+	return _gbc_index.has(p_gbc_class)
+
+
+## Returns true if the givn object is GBC complient
+func is_gbc_complient(p_object: Object) -> bool:
+	# Placeholder for when GDScript has support for traits or interfaces
+	return is_instance_valid(p_object) and p_object.has_method("get_uname")
