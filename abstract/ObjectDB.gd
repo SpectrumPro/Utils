@@ -56,7 +56,7 @@ func register_component(p_component: Object) -> bool:
 	_check_component_requests(p_component)
 	_check_class_callbacks(p_component)
 	
-	p_component.delete_requested.connect(deregister_component.bind(p_component), CONNECT_ONE_SHOT)
+	p_component.delete_requested.connect(deregister_component)
 	components_added.emit([p_component])
 	
 	return true
@@ -74,7 +74,9 @@ func deregister_component(p_component: Object) -> bool:
 	_check_class_callbacks(p_component, true)
 	_components.erase(p_component.get_uuid())
 	
+	p_component.delete_requested.disconnect(deregister_component)
 	components_removed.emit([p_component])
+	
 	return true
 
 

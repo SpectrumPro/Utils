@@ -12,11 +12,12 @@ class_name GlobalBaseClass extends Object
 @warning_ignore_start("unused_signal", "unused_private_class_variable", "unused_parameter")
 
 ## Emitted when the user-defined name of this object changes.
-signal name_changed()
+signal name_changed(new_name: String)
 
 ## Emitted when this object is to be deleted (freed from memory). 
 ## Required to notify any other scripts referencing this object to de-reference it.
-signal delete_requested()
+## param from is a refernce to this object
+signal delete_requested(from: Object)
 
 
 ## The user-defined name of this object. The variable name can be arbitrary.
