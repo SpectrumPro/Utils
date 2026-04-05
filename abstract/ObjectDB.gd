@@ -7,10 +7,10 @@ class_name ObjectDB extends Node
 
 
 ## Emitted when a component is added to the engine.
-signal component_added(p_component: Object)
+signal components_added(components: Array)
 
 ## Emitted when a component is removed from the engine.
-signal component_removed(p_component: Object)
+signal components_removed(components: Array)
 
 
 ## Stores all components by their UUID. for all instances of ObjectDB
@@ -57,7 +57,7 @@ func register_component(p_component: Object) -> bool:
 	_check_class_callbacks(p_component)
 	
 	p_component.delete_requested.connect(deregister_component.bind(p_component), CONNECT_ONE_SHOT)
-	component_added.emit(p_component)
+	components_added.emit([p_component])
 	
 	return true
 
@@ -74,7 +74,7 @@ func deregister_component(p_component: Object) -> bool:
 	_check_class_callbacks(p_component, true)
 	_components.erase(p_component.get_uuid())
 	
-	component_removed.emit(p_component)
+	components_removed.emit([p_component])
 	return true
 
 
