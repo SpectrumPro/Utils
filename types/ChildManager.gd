@@ -64,6 +64,9 @@ var _manager: SettingsManager
 ## The String ID asigned to this ChildManager when its managed by a SettingsManager
 var _id: String
 
+## The String category asigned to this ChildManager when its managed by a SettingsManager
+var _category: String
+
 
 ## init
 func _init(
@@ -214,6 +217,11 @@ func get_id() -> String:
 	return _id
 
 
+## Returns the category of this ChildManager
+func get_category() -> String:
+	return _category
+
+
 ## Set the parent Object
 func set_parent(p_parent: Object) -> void:
 	_parent = p_parent
@@ -331,6 +339,11 @@ func _set_settings_manager(p_manager: SettingsManager) -> void:
 ## Sets the ID
 func _set_id(p_id: String) -> void:
 	_id = p_id
+
+
+## Sets the category
+func _set_category(p_category: String) -> void:
+	_category = p_category
 
 
 ## Queues (if not already) the emission of modification_callback

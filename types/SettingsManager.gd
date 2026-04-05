@@ -121,6 +121,7 @@ func add_child_manager(p_id: String, p_manager: ChildManager) -> bool:
 	
 	p_manager._set_settings_manager(self)
 	p_manager._set_id(p_id)
+	p_manager._set_category(_inheritance_list[-1])
 	
 	_child_managers[p_id] = p_manager
 	return true
