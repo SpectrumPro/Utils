@@ -89,32 +89,9 @@ var custom_type_map: Dictionary[Type, Variant.Type] = {
 }
 
 
-## User config
-var _config: Dictionary[String, Variant]
-
-## User config method to convert a custom type into a string
-var _custom_type_to_string_method: Callable
-
-## User config method to get a name changed signal from an object
-var _get_object_name_signal_method: Callable
-
-## User config method to get the ObjectDB for a object
-var _get_object_db_method: Callable
-
-## User config Dictionary for storeing GBCIndexConfig for each GBC complient class
-var _gbc_index: Dictionary[String, GBCIndexConfig]
-
-
-## static init
-func _init() -> void:
-	var script: Variant = load("res://DataConfig.gd")
-	
-	if script is GDScript and script.get("config") is Dictionary:
-		_config = script.get("config")
-		
-		_custom_type_to_string_method = type_convert(_config.get("custom_type_to_string_method"), TYPE_CALLABLE)
-		_get_object_name_signal_method = type_convert(_config.get("get_object_name_signal_method"), TYPE_CALLABLE)
-		_get_object_db_method = type_convert(_config.get("get_object_db_method"), TYPE_CALLABLE)
+## ready
+func _ready() -> void:
+	Config.load_config("res://DataConfig.gd")
 
 
 ## Returns true if the 2 given types have a matching Variant.Type base
@@ -127,26 +104,20 @@ func do_types_match_base(p_type_one: Type, p_type_two: Type) -> bool:
 
 ## Converts a custom data type to a string, with a human readable name
 func custom_type_to_string(p_variant: Variant, p_orignal_type: Type) -> String:
-	if _custom_type_to_string_method.is_valid():
-		var result: Variant = _custom_type_to_string_method.call(p_variant, p_orignal_type)
-		
-		if typeof(result) == TYPE_STRING:
-			return result
-			
+	if p_variant is Object and is_instance_valid(p_variant) and p_variant.has_method("get_uname"):
+		return p_variant.get_uname()
+	
 	return type_convert(p_variant, TYPE_STRING)
 
 
 ## Returns the signal emitted when the name of an object is changed
 func get_object_name_changed_signal(p_module: SettingsModule) -> Signal:
-	if _get_object_name_signal_method.is_valid():
-		var result: Variant = _get_object_name_signal_method.call(p_module)
-		
-		if typeof(result) == TYPE_SIGNAL:
-			return result
-	
 	var object: Variant = p_module.get_getter().call()
 	if typeof(object) != TYPE_OBJECT or not is_instance_valid(object):
 		return Signal()
+	
+	if object.has_signal("name_changed"):
+		return object.name_changed
 	
 	if object is Node:
 		return (object as Node).renamed
@@ -160,12 +131,12 @@ func get_gbc_config(p_gbc_class: Variant) -> GBCIndexConfig:
 		p_gbc_class = p_gbc_class.get_global_name()
 	
 	p_gbc_class = type_convert(p_gbc_class, TYPE_STRING)
-	return _gbc_index.get(p_gbc_class, null)
+	return Config.gbc_index.get(p_gbc_class, null)
 
 
 ## Adds a GBC index 
 func add_gbc_index(p_index: GBCIndexConfig) -> void:
-	_gbc_index[p_index.get_base_class().get_global_name()] = p_index
+	Config.gbc_index[p_index.get_base_class().get_global_name()] = p_index
 
 
 ## Returns true if a GBCIndexConfig exists for the given GBC class name, either a Script or String classname 
@@ -174,10 +145,29 @@ func has_gbc_config(p_gbc_class: Variant) -> bool:
 		p_gbc_class = p_gbc_class.get_global_name()
 	
 	p_gbc_class = type_convert(p_gbc_class, TYPE_STRING)
-	return _gbc_index.has(p_gbc_class)
+	return Config.gbc_index.has(p_gbc_class)
 
 
 ## Returns true if the givn object is GBC complient
 func is_gbc_complient(p_object: Object) -> bool:
 	# Placeholder for when GDScript has support for traits or interfaces
 	return is_instance_valid(p_object) and p_object.has_method("get_uname")
+
+
+## Stores config for Data
+class Config extends Object:
+	## User config Dictionary for storeing GBCIndexConfig for each GBC complient class
+	static var gbc_index: Dictionary
+	
+	## Loads config from a file
+	static func load_config(p_path: String) -> bool:
+		var script: Variant = load(p_path)
+		
+		if script is not GDScript:
+			return false
+		
+		var config: Dictionary = script.new().get("config")
+		
+		gbc_index = type_convert(config.get("gbc_index"), TYPE_DICTIONARY)
+		
+		return true

@@ -25,6 +25,7 @@ var _hidden_classes: Array = []
 var _always_searlize_classes: Array[String] = []
 
 
+## ready
 func _ready() -> void:
 	rebuild_maps(_global_class_tree)
 
