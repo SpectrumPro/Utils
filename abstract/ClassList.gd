@@ -24,14 +24,30 @@ var _hidden_classes: Array = []
 ## Classes that should always seralize
 var _always_searlize_classes: Array[String] = []
 
+## True if rebuild_maps has been called
+var _has_built_maps: bool = false
+
 
 ## ready
 func _ready() -> void:
 	rebuild_maps(_global_class_tree)
 
 
+## Merges in another class tree, rebuilds maps if needed
+func merge_class_tree(p_tree: Dictionary) -> void:
+	if not p_tree:
+		return
+	
+	Utils.merge_deep(_global_class_tree, p_tree)
+	
+	if _has_built_maps:
+		rebuild_maps(_global_class_tree)
+
+
 ## Builds both the inheritance map and the class script map from the class_tree.
 func rebuild_maps(tree: Dictionary) -> void:
+	_has_built_maps = false
+	
 	var inheritance_map: Dictionary = {}
 	var class_script_map: Dictionary = {}
 	var inheritance_trees: Dictionary = {}
@@ -42,32 +58,8 @@ func rebuild_maps(tree: Dictionary) -> void:
 	_inheritance_map = inheritance_map
 	_inheritance_trees = inheritance_trees
 	_script_map = class_script_map
-
-
-## Processes a node in the class_tree.
-func _process_node(key: String, node: Variant, inheritance_map: Dictionary, inheritance_trees: Dictionary, class_script_map: Dictionary, current_position: Array) -> void:
-	if node is Dictionary:
-		for subkey in node.keys():
-			var subnode = node[subkey]
-			var remove_pos: bool = false
-			
-			if not current_position or current_position.back() != subkey:
-				current_position.push_back(subkey)
-				remove_pos = true
-			
-			if subnode is Dictionary:
-				_process_node(subkey, subnode, inheritance_map, inheritance_trees, class_script_map, current_position)
-			else:
-				class_script_map[subkey] = subnode
-				inheritance_trees[subkey] = current_position.duplicate()
-				
-				for pos_key: String in current_position:
-					inheritance_map.get_or_add(pos_key, []).append(subkey)
-			
-			if remove_pos:
-				current_position.pop_back()
-	else:
-		class_script_map[key] = node
+	
+	_has_built_maps = true
 
 
 ## Returns the class script from the script map, or null if not found
@@ -98,6 +90,16 @@ func get_script_map() -> Dictionary:
 	return _script_map.duplicate()
 
 
+## Returns the parent classname of the given class, or "" if the class is top level
+func get_class_parent(p_classname: String) -> String:
+	var inhr_tree: Array = _inheritance_trees.get(p_classname, [])
+	
+	if not inhr_tree.size() >= 2:
+		return ""
+	else:
+		return inhr_tree[-2]
+
+
 ## Gets all the classes that extend the given parent class
 func get_classes_from_parent(parent_class: String) -> Dictionary:
 	return _inheritance_map.get(parent_class, {}).duplicate()
@@ -121,3 +123,29 @@ func does_class_inherit(base_class: String, inheritance: String) -> bool:
 ## Checks if a class should seralize
 func should_class_searlize(classname: String) -> bool:
 	return _always_searlize_classes.has(classname)
+
+
+## Processes a node in the class_tree.
+func _process_node(key: String, node: Variant, inheritance_map: Dictionary, inheritance_trees: Dictionary, class_script_map: Dictionary, current_position: Array) -> void:
+	if node is Dictionary:
+		for subkey in node.keys():
+			var subnode = node[subkey]
+			var remove_pos: bool = false
+			
+			if not current_position or current_position.back() != subkey:
+				current_position.push_back(subkey)
+				remove_pos = true
+			
+			if subnode is Dictionary:
+				_process_node(subkey, subnode, inheritance_map, inheritance_trees, class_script_map, current_position)
+			else:
+				class_script_map[subkey] = subnode
+				inheritance_trees[subkey] = current_position.duplicate()
+				
+				for pos_key: String in current_position:
+					inheritance_map.get_or_add(pos_key, []).append(subkey)
+			
+			if remove_pos:
+				current_position.pop_back()
+	else:
+		class_script_map[key] = node
