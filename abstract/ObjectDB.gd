@@ -3,7 +3,7 @@
 # See the LICENSE file for details.
 
 class_name CoreObjectDB extends CoreGlobal
-## ObjectDB manages all currently registered components in the engine.
+## CoreObjectDB manages all currently registered components in the engine.
 
 
 ## Emitted when a component is added to the engine.
@@ -13,10 +13,10 @@ signal components_added(components: Array)
 signal components_removed(components: Array)
 
 
-## Stores all components by their UUID. for all instances of ObjectDB
+## Stores all components by their UUID. for all instances of CoreObjectDB
 static var _static_components: Dictionary[String, Object]
 
-## Stores all static component request, requests that work accross any instance of ObjectDB
+## Stores all static component request, requests that work accross any instance of CoreObjectDB
 static var _static_requests: Dictionary[String, Array]
 
 
@@ -96,7 +96,7 @@ func get_component(p_uuid: String) -> Object:
 	return _components.get(p_uuid)
 
 
-## Returns all components in this ObjectDB
+## Returns all components in this CoreObjectDB
 func get_components() -> Array:
 	return _components.values()
 
@@ -109,7 +109,7 @@ func has_component(p_component: Object) -> bool:
 	return _components.has(p_component.get_uuid())
 
 
-## Returns true if the given component is allowed in this ObjectDB
+## Returns true if the given component is allowed in this CoreObjectDB
 func is_component_allowed(p_component: Object) -> bool:
 	return p_component.has_method("get_uuid") 
 
@@ -127,7 +127,7 @@ func request_component(p_uuid: String, p_callback: Callable) -> void:
 		_component_requests[p_uuid].append(p_callback)
 
 
-## Registers a static callback to be called once when a component with p_uuid is added. Works accross any instance of ObjectDB
+## Registers a static callback to be called once when a component with p_uuid is added. Works accross any instance of CoreObjectDB
 static func request_component_static(p_uuid: String, p_callback: Callable) -> void:
 	if not p_uuid:
 		return
@@ -149,7 +149,7 @@ func remove_request(p_uuid: String, p_callback: Callable) -> void:
 			_component_requests.erase(p_uuid)
 
 
-## Removes a previously registered component request. Works accross any instance of ObjectDB
+## Removes a previously registered component request. Works accross any instance of CoreObjectDB
 static func remove_request_static(p_uuid: String, p_callback: Callable) -> void:
 	if p_uuid in _static_requests and p_callback in _static_requests[p_uuid]:
 		_static_requests[p_uuid].erase(p_callback)

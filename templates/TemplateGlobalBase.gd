@@ -4,7 +4,7 @@
 
 class_name GlobalBaseClass extends Object
 ## The GlobalBaseClass (GBC) defines the required member variables, signals, constructors, and methods
-## that a class must implement to be compatible with the global ClassList and ObjectDB.
+## that a class must implement to be compatible with the global ComponentClassList and CoreObjectDB.
 ##
 ## Any class can extend any built-in Godot class (e.g., Node, RefCounted) as long as it implements
 ## the following structure and methods.

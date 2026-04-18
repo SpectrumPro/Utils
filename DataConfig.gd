@@ -14,7 +14,7 @@ static var config: Dictionary[String, Variant] = {
 	"get_object_name_signal_method": get_object_name_changed_signal,
 	"get_object_db": get_object_db,
 	"gbc_index": {
-		#"ClassName": GBCIndexConfig.new(Script, ObjectDB, ClassListDB, ChildManager)
+		#"ClassName": GBCIndexConfig.new(Script, CoreObjectDB, CoreClassListDB, ChildManager)
 	}
 }
 
@@ -46,8 +46,8 @@ static func get_object_name_changed_signal(p_module: SettingsModule) -> Variant:
 
 
 
-## Returns the ObjectDB that p_object's type belongs to
-static func get_object_db(p_object: Object) -> ObjectDB:
+## Returns the CoreObjectDB that p_object's type belongs to
+static func get_object_db(p_object: Object) -> CoreObjectDB:
 	if not is_instance_valid(p_object):
 		return null
 	

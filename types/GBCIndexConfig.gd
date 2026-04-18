@@ -3,24 +3,24 @@
 # See the LICENSE file for details.
 
 class_name GBCIndexConfig extends Object
-## Class for storing ObjectDB and ClassListDB entrys for GBC complient objects
+## Class for storing CoreObjectDB and CoreClassListDB entrys for GBC complient objects
 
 
 ## The base class
 var _base_class: Script
 
-## The ObjectDB for the base class
-var _objectdb: ObjectDB
+## The CoreObjectDB for the base class
+var _objectdb: CoreObjectDB
 
-## The ClassListDB for the base class
-var _classdb: ClassListDB
+## The CoreClassListDB for the base class
+var _classdb: CoreClassListDB
 
 ## The ChildManager to use when adding and removing objects
 var _child_manager: ChildManager
 
 
 ## Init
-func _init(p_base_class: Script, p_objectdb: ObjectDB, p_classdb: ClassListDB, p_child_manager: ChildManager) -> void:
+func _init(p_base_class: Script, p_objectdb: CoreObjectDB, p_classdb: CoreClassListDB, p_child_manager: ChildManager) -> void:
 	_base_class = p_base_class
 	_objectdb = p_objectdb
 	_classdb = p_classdb
@@ -32,13 +32,13 @@ func get_base_class() -> Script:
 	return _base_class
 
 
-## Returns the ObjectDB for this GBC Class
-func get_objectdb() -> ObjectDB:
+## Returns the CoreObjectDB for this GBC Class
+func get_objectdb() -> CoreObjectDB:
 	return _objectdb
 
 
-## Returns the ObjectDB for this GBC Class
-func get_class_listdb() -> ClassListDB:
+## Returns the CoreObjectDB for this GBC Class
+func get_class_listdb() -> CoreClassListDB:
 	return _classdb
 
 
