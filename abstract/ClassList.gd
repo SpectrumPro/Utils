@@ -2,7 +2,7 @@
 # This file is part of the Spectrum Lighting Engine, licensed under the GPL v3.0 or later.
 # See the LICENSE file for details.
 
-class_name ClassListDB extends Node
+class_name CoreClassListDB extends CoreGlobal
 ## Contains a list of all the classes for a given base class
 
 
@@ -26,6 +26,12 @@ var _always_searlize_classes: Array[String] = []
 
 ## True if rebuild_maps has been called
 var _has_built_maps: bool = false
+
+
+## init
+func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
+	super._init(p_uuid, p_args)
+	_set_class_name("CoreClassListDB")
 
 
 ## ready

@@ -2,7 +2,7 @@
 # This file is part of the Spectrum Lighting Engine, licensed under the GPL v3.0 or later.
 # See the LICENSE file for details.
 
-class_name CoreLogger extends Node
+class_name CoreLogger extends CoreGlobal
 ## Handles custom logging methods
 
 
@@ -46,6 +46,9 @@ var _instance_name: String
 
 ## init
 func _init() -> void:
+	super._init()
+	_set_class_name("CoreLogger")
+	
 	OS.add_logger(_engine_logger)
 	LoggerConfig.load_config("res://LoggerConfig.gd")
 	

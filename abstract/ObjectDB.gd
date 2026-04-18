@@ -2,7 +2,7 @@
 # This file is part of the Spectrum Lighting Engine, licensed under the GPL v3.0 or later.
 # See the LICENSE file for details.
 
-class_name ObjectDB extends Node
+class_name CoreObjectDB extends CoreGlobal
 ## ObjectDB manages all currently registered components in the engine.
 
 
@@ -37,6 +37,12 @@ var _just_changed_components: Dictionary[String, Dictionary]
 
 ## True if _emit_class_callbacks is queued to run at the end of this frame.
 var _emit_class_callbacks_queued: bool = false
+
+
+## init
+func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
+	super._init(p_uuid, p_args)
+	_set_class_name("CoreObjectDB")
 
 
 ## Registers a component in the database. Returns false if it already exists.

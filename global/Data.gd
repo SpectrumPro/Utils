@@ -2,7 +2,7 @@
 # This file is part of the Spectrum Lighting Engine, licensed under the GPL v3.0 or later.
 # See the LICENSE file for details.
 
-class_name CoreData extends Node
+class_name CoreData extends CoreGlobal
 ## Class to manage custom data types
 
 
@@ -87,6 +87,12 @@ var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.PACKEDSCENE:		TYPE_OBJECT,
 	Type.ACTION:			TYPE_NIL,
 }
+
+
+## init
+func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
+	super._init(p_uuid, p_args)
+	_set_class_name("CoreData")
 
 
 ## ready
