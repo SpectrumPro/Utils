@@ -87,5 +87,6 @@ func deserialize(p_serialized_data: Dictionary, p_flags: Data.SerializationFlags
 
 ## Sets the class name for this object and appends it to the inheritance tree.
 func _set_class_name(p_class_name: String) -> void:
+	_uuid = p_class_name
 	_class_name = p_class_name
 	_class_tree.append(p_class_name)

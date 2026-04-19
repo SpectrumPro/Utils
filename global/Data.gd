@@ -88,6 +88,9 @@ var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.ACTION:			TYPE_NIL,
 }
 
+## Stores all autoload Globals
+var _globals: Array[CoreGlobal]
+
 
 ## init
 func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
@@ -98,6 +101,31 @@ func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
 ## ready
 func _ready() -> void:
 	Config.load_config("res://DataConfig.gd")
+	
+	var global_class_tree: Dictionary[String, Variant]
+	for node: Node in get_tree().get_root().get_children():
+		if node is CoreGlobal:
+			_globals.append(node)
+			
+			GlobalDB.register_component(node)
+			global_class_tree[node.get_class_name()] = node.get_script()
+	
+	GlobalClassList.merge_class_tree({"CoreGlobal": global_class_tree})
+	add_gbc_index(GBCIndexConfig.new(CoreGlobal, GlobalDB, GlobalClassList, ChildManager.new(
+		self,
+		Callable(),
+		Callable(),
+		Callable(),
+		Callable(),
+		Callable(),
+		Callable(),
+		Callable(),
+		get_globals,
+		Signal(),
+		Signal(),
+		CoreGlobal,
+		CoreGlobal,
+	)))
 
 
 ## Returns true if the 2 given types have a matching Variant.Type base
@@ -129,6 +157,11 @@ func get_object_name_changed_signal(p_module: SettingsModule) -> Signal:
 		return (object as Node).renamed
 	
 	return Signal()
+
+
+## Returns all the CoreGlobal nodes
+func get_globals() -> Array[CoreGlobal]:
+	return _globals.duplicate()
 
 
 ## Returns the GBCIndexConfig for the given GBC class name, either a Script or String classname

@@ -1,0 +1,17 @@
+# Copyright (c) 2026 Liam Sherwin. All rights reserved.
+# This file is part of the Spectrum Lighting Controller, licensed under the GPL v3.0 or later.
+# See the LICENSE file for details.
+
+class_name CoreGlobalDB extends CoreObjectDB
+## Stores all CoreGlobal objects
+
+
+## init
+func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
+	super._init(p_uuid, p_args)
+	_set_class_name("GlobalDB")
+
+
+## Returns true if the given component is allowed in this GlobalDB
+func is_component_allowed(p_component: Object) -> bool:
+	return p_component is CoreGlobal
