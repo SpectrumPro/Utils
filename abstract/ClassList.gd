@@ -11,22 +11,22 @@ static var _class_gbc_relations: Dictionary[String, GBCIndexConfig]
 
 
 ## Contains all the classes sorted by the class hierarchy tree
-var _global_class_tree: Dictionary = {}
+var _global_class_tree: Dictionary
 
 ## Contains all classes keyed by clasname, value is an array containing all classes that exten the keyed class
-var _inheritance_map: Dictionary = {}
+var _inheritance_map: Dictionary[String, Array]
 
 ## Contains the class inheritance list for each class
-var _inheritance_trees: Dictionary = {}
+var _inheritance_trees: Dictionary[String, Array]
 
 ## Contains all the class scripts keyed by the classname
-var _script_map: Dictionary = {}
+var _script_map: Dictionary[String, Script]
 
 ## Contains all the hidden classes that should not be shown to the user
-var _hidden_classes: Array = []
+var _hidden_classes: Array[String]
 
 ## Classes that should always seralize
-var _always_searlize_classes: Array[String] = []
+var _always_searlize_classes: Array[String]
 
 ## True if rebuild_maps has been called
 var _has_built_maps: bool = false
@@ -58,26 +58,18 @@ func merge_class_tree(p_tree: Dictionary) -> void:
 
 
 ## Builds both the inheritance map and the class script map from the class_tree.
-func rebuild_maps(tree: Dictionary) -> void:
+func rebuild_maps(p_tree: Dictionary) -> void:
 	_has_built_maps = false
 	
-	for key: String in tree.keys():
-		_process_node(key, tree[key], [key])
+	for key: String in p_tree.keys():
+		_process_node(key, p_tree[key], [key])
 	
 	_has_built_maps = true
 
 
 ## Returns the class script from the script map, or null if not found
-func get_class_script(classname: String) -> Script:
-	return _script_map.get(classname, null)
-
-
-## Checks if a class exists in the map
-func has_class(classname: String, match_parent: String = "") -> bool:
-	if match_parent:
-		return _script_map.has(classname) and _inheritance_map.get(match_parent, {}).has(classname)
-	else:
-		return _script_map.has(classname)
+func get_class_script(p_classname: String) -> Script:
+	return _script_map.get(p_classname, null)
 
 
 ## Returns a copy of the global class tree
@@ -117,7 +109,6 @@ func get_class_inheritance_tree(classname: String) -> Array:
 
 ## Returns the GBCIndexConfig for a given classname
 static func get_class_gbc_index(p_classname: String) -> GBCIndexConfig:
-	print(_class_gbc_relations)
 	return _class_gbc_relations.get(p_classname, null)
 
 
@@ -126,9 +117,17 @@ func is_class_hidden(classname: String) -> bool:
 	return _hidden_classes.has(classname)
 
 
+## Checks if a class exists in the map, also allows for checking the classname of the parent
+func has_class(p_classname: String, p_match_parent: String = "") -> bool:
+	if p_match_parent:
+		return _script_map.has(p_classname) and _inheritance_map.get(p_match_parent, {}).has(p_classname)
+	else:
+		return _script_map.has(p_classname)
+
+
 ## Checks if a class inherits from another class
-func does_class_inherit(base_class: String, inheritance: String) -> bool:
-	return _inheritance_trees[base_class].has(inheritance)
+func does_class_inherit(p_base_class: String, p_inheritance: String) -> bool:
+	return _inheritance_trees.get(p_base_class, []).has(p_inheritance)
 
 
 ## Returns true if the parent class is an ansestor of the child class
@@ -137,8 +136,8 @@ func does_parent_have(p_parent_class: String, p_child_class: String) -> bool:
 
 
 ## Checks if a class should seralize
-func should_class_searlize(classname: String) -> bool:
-	return _always_searlize_classes.has(classname)
+func should_class_searlize(p_classname: String) -> bool:
+	return _always_searlize_classes.has(p_classname)
 
 
 ## Processes a node in the class_tree.
