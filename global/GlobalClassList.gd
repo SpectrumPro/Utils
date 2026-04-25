@@ -10,3 +10,8 @@ class_name CoreGlobalClassList extends CoreClassListDB
 func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
 	super._init(p_uuid, p_args)
 	_set_class_name("CoreGlobalClassList")
+
+
+## Sets the GBCIndexConfig for this CoreGlobalClassList
+func _set_gbc_index(p_index: GBCIndexConfig) -> void:
+	_gbc_index = p_index

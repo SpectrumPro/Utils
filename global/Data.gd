@@ -110,7 +110,6 @@ func _ready() -> void:
 			GlobalDB.register_component(node)
 			global_class_tree[node.get_class_name()] = node.get_script()
 	
-	GlobalClassList.merge_class_tree({"CoreGlobal": global_class_tree})
 	add_gbc_index(GBCIndexConfig.new(CoreGlobal, GlobalDB, GlobalClassList, ChildManager.new(
 		self,
 		Callable(),
@@ -126,6 +125,8 @@ func _ready() -> void:
 		CoreGlobal,
 		CoreGlobal,
 	)))
+	GlobalClassList._set_gbc_index(get_gbc_config(CoreGlobal))
+	GlobalClassList.merge_class_tree({"CoreGlobal": global_class_tree})
 
 
 ## Returns true if the 2 given types have a matching Variant.Type base

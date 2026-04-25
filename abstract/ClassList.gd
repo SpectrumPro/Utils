@@ -6,13 +6,17 @@ class_name CoreClassListDB extends CoreGlobal
 ## Contains a list of all the classes for a given base class
 
 
-## Contains all the classes sorted by the system hierarchy tree
+## Stores the GBCIndexConfig for all classes in any CoreClassListDB
+static var _class_gbc_relations: Dictionary[String, GBCIndexConfig]
+
+
+## Contains all the classes sorted by the class hierarchy tree
 var _global_class_tree: Dictionary = {}
 
-## Contains all classes sorted by the inheritance tree
+## Contains all classes keyed by clasname, value is an array containing all classes that exten the keyed class
 var _inheritance_map: Dictionary = {}
 
-## Contains the class tree for each class
+## Contains the class inheritance list for each class
 var _inheritance_trees: Dictionary = {}
 
 ## Contains all the class scripts keyed by the classname
@@ -26,6 +30,9 @@ var _always_searlize_classes: Array[String] = []
 
 ## True if rebuild_maps has been called
 var _has_built_maps: bool = false
+
+## The GBCIndex theese classes are from
+var _gbc_index: GBCIndexConfig
 
 
 ## init
@@ -54,16 +61,8 @@ func merge_class_tree(p_tree: Dictionary) -> void:
 func rebuild_maps(tree: Dictionary) -> void:
 	_has_built_maps = false
 	
-	var inheritance_map: Dictionary = {}
-	var class_script_map: Dictionary = {}
-	var inheritance_trees: Dictionary = {}
-	
-	for key in tree.keys():
-		_process_node(key, tree[key], inheritance_map, inheritance_trees, class_script_map, [key])
-	
-	_inheritance_map = inheritance_map
-	_inheritance_trees = inheritance_trees
-	_script_map = class_script_map
+	for key: String in tree.keys():
+		_process_node(key, tree[key], [key])
 	
 	_has_built_maps = true
 
@@ -116,6 +115,12 @@ func get_class_inheritance_tree(classname: String) -> Array:
 	return _inheritance_trees.get(classname, []).duplicate()
 
 
+## Returns the GBCIndexConfig for a given classname
+static func get_class_gbc_index(p_classname: String) -> GBCIndexConfig:
+	print(_class_gbc_relations)
+	return _class_gbc_relations.get(p_classname, null)
+
+
 ## Checks if the given class is marked as hidden
 func is_class_hidden(classname: String) -> bool:
 	return _hidden_classes.has(classname)
@@ -126,32 +131,37 @@ func does_class_inherit(base_class: String, inheritance: String) -> bool:
 	return _inheritance_trees[base_class].has(inheritance)
 
 
+## Returns true if the parent class is an ansestor of the child class
+func does_parent_have(p_parent_class: String, p_child_class: String) -> bool:
+	return _inheritance_map.get(p_parent_class, []).has(p_child_class)
+
+
 ## Checks if a class should seralize
 func should_class_searlize(classname: String) -> bool:
 	return _always_searlize_classes.has(classname)
 
 
 ## Processes a node in the class_tree.
-func _process_node(key: String, node: Variant, inheritance_map: Dictionary, inheritance_trees: Dictionary, class_script_map: Dictionary, current_position: Array) -> void:
-	if node is Dictionary:
-		for subkey in node.keys():
-			var subnode = node[subkey]
-			var remove_pos: bool = false
-			
-			if not current_position or current_position.back() != subkey:
-				current_position.push_back(subkey)
-				remove_pos = true
-			
-			if subnode is Dictionary:
-				_process_node(subkey, subnode, inheritance_map, inheritance_trees, class_script_map, current_position)
-			else:
-				class_script_map[subkey] = subnode
-				inheritance_trees[subkey] = current_position.duplicate()
+func _process_node(p_class: String, p_value: Variant, p_current_position: Array) -> void:
+	match typeof(p_value):
+		TYPE_DICTIONARY:
+			for classname: String in p_value:
+				var remove: bool = true
 				
-				for pos_key: String in current_position:
-					inheritance_map.get_or_add(pos_key, []).append(subkey)
+				if p_current_position[-1] != classname:
+					p_current_position.append(classname)
+				else:
+					remove = false
+				
+				_process_node(classname, p_value[classname], p_current_position)
+				
+				if remove:
+					p_current_position.pop_back()
+		
+		TYPE_OBJECT when p_value is Script:
+			_inheritance_trees[p_class] = p_current_position.duplicate()
+			_class_gbc_relations[p_class] = _gbc_index
+			_script_map[p_class] = p_value
 			
-			if remove_pos:
-				current_position.pop_back()
-	else:
-		class_script_map[key] = node
+			for position: String in p_current_position:
+				_inheritance_map.get_or_add(position, []).append(p_class)
