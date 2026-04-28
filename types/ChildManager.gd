@@ -101,37 +101,37 @@ func _init(
 
 ## Creates a new child with the given class name. Resolves with the new child Object.
 func create_child(p_class_name: String) -> Promise:
-	return _call_if_valid_promise(_create_child_method, [p_class_name])
+	return _call_if_valid_promise(_create_child_method, p_class_name)
 
 
 ## Adds a single child to the parent. Resolves with true if the child was added, false if it already existed.
 func add_child(p_child: Object) -> Promise:
-	return _call_if_valid_promise(_add_child_method, [p_child])
+	return _call_if_valid_promise(_add_child_method, p_child)
 
 
 ## Adds multiple children to the parent. Resolves with no value.
 func add_children(p_children: Array) -> Promise:
-	return _call_if_valid_promise(_add_children_method, [p_children])
+	return _call_if_valid_promise(_add_children_method, p_children)
 
 
 ## Removes a single child from the parent. Resolves with true if the child was removed, false if it did not exist.
 func remove_child(p_child: Object) -> Promise:
-	return _call_if_valid_promise(_remove_child_method, [p_child])
+	return _call_if_valid_promise(_remove_child_method, p_child)
 
 
 ## Removes multiple children from the parent. Resolves with no value.
 func remove_children(p_children: Array) -> Promise:
-	return _call_if_valid_promise(_remove_children_method, [p_children])
+	return _call_if_valid_promise(_remove_children_method, p_children)
 
 
 ## Duplicates a single child. Resolves with the new child Object
 func duplicate_child(p_child: Object) -> Promise:
-	return _call_if_valid_promise(_duplicate_child_method, [p_child])
+	return _call_if_valid_promise(_duplicate_child_method, p_child)
 
 
 ## Duplicates mutiple children. Resolves with the new child Objects
 func duplicate_children(p_children: Array) -> Promise:
-	return _call_if_valid_promise(_duplicate_children_method, [p_children])
+	return _call_if_valid_promise(_duplicate_children_method, p_children)
 
 
 ## Returns all the children in the parent
