@@ -11,7 +11,7 @@ signal modification_callback(added: Array, removed: Array)
 
 
 ## The parent Object
-var _parent: Object
+var _parent: WeakRef
 
 ## The Callable to create a new child
 var _create_child_method: Callable
@@ -144,7 +144,7 @@ func get_children() -> Array:
 
 ## Get the parent Object
 func get_parent() -> Object:
-	return _parent
+	return _parent.get_ref()
 
 
 ## Gets the Callable used to create a child
@@ -224,7 +224,7 @@ func get_category() -> String:
 
 ## Set the parent Object
 func set_parent(p_parent: Object) -> void:
-	_parent = p_parent
+	_parent = weakref(p_parent)
 
 
 ## Sets the Callable used to create a child
