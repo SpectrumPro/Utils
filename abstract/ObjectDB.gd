@@ -105,6 +105,7 @@ func deregister_component(p_component: Object) -> bool:
 		_components_by_classname[classname].erase(p_component)
 	
 	_components.erase(p_component.get_uuid())
+	_static_components.erase(p_component.get_uuid())
 	
 	if p_component.delete_requested.is_connected(deregister_component):
 		p_component.delete_requested.disconnect(deregister_component)
