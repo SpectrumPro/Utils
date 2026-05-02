@@ -64,9 +64,8 @@ static func remove_numbers(p_string: String) -> Dictionary:
 
 ## Saves a JSON valid dictonary to a file, creates the file and folder if it does not exist
 static func save_json_to_file(file_path: String, file_name: String, json: Dictionary) -> Error:
-	if not DirAccess.dir_exists_absolute(file_path):
-		print("The folder \"" + file_path + "\" does not exist, creating one now, errcode: ", DirAccess.make_dir_absolute(file_path))
-
+	ensure_folder_exists(file_path)
+	
 	var file_access: FileAccess = FileAccess.open(file_path+"/"+file_name, FileAccess.WRITE)
 	
 	if FileAccess.get_open_error():
@@ -77,6 +76,17 @@ static func save_json_to_file(file_path: String, file_name: String, json: Dictio
 	file_access.close()
 	
 	return file_access.get_error()
+
+
+## Ensures a folder exists on the file system, if not one will be created
+static func ensure_folder_exists(folder_path: String) -> void:
+	if not DirAccess.dir_exists_absolute(folder_path):
+		var errcode: Error = DirAccess.make_dir_recursive_absolute(folder_path)
+		
+		if errcode:
+			push_warning("The folder \"",folder_path ,"\" did not exist, failed to create with errcode: ", error_string(errcode))
+		else:
+			printerr("The folder \"",folder_path ,"\" did not exist, one has been created")
 
 
 ## Loads JSON from a file, returning the JSON dictionary or {}
@@ -213,3 +223,17 @@ static func merge_deep(base: Dictionary, override: Dictionary) -> Dictionary:
 			result[key] = override[key]
 	
 	return result
+
+
+## Returns all the scripts in the given folder, stored as {"ScriptName": Script}
+static func get_scripts_from_folder(p_folder: String) -> Dictionary:
+	ensure_folder_exists(p_folder)
+	var script_files: PackedStringArray = DirAccess.get_files_at(p_folder)
+	var scripts: Dictionary = {}
+
+	# Loop through all the script files if any, and add them
+	for file_name: String in script_files:
+		if file_name.ends_with(".gd"):
+			scripts[file_name] = load(p_folder + "/" + file_name)
+
+	return scripts
