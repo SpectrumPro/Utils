@@ -13,6 +13,10 @@ signal components_added(components: Array)
 signal components_removed(components: Array)
 
 
+## Time in seconds anon components are kept in ObjectDB
+const ANON_REMOVE_TIME: float = 5.0
+
+
 ## Stores all components by their UUID. for all instances of CoreObjectDB
 static var _static_components: Dictionary[String, Object]
 
@@ -38,6 +42,12 @@ var _just_changed_components: Dictionary[String, Dictionary]
 ## True if _emit_class_callbacks is queued to run at the end of this frame.
 var _emit_class_callbacks_queued: bool = false
 
+## Stores all componets that were registered anonymously, stored with the unix timestamp of when they were added
+var _anon_components: Dictionary[Object, float]
+
+## The Timer used to remove anon components after the given time
+var _anon_timer: Timer = Timer.new()
+
 
 ## init
 func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
@@ -45,25 +55,42 @@ func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
 	_set_class_name("CoreObjectDB")
 
 
-## Registers a component in the database. Returns false if it already exists.
-## p_component must be GBC-compliant.
-func register_component(p_component: Object) -> bool:
-	if not is_component_allowed(p_component) or p_component.get_uuid() in _components:
+## ready
+func _ready() -> void:
+	_anon_timer.set_wait_time(ANON_REMOVE_TIME)
+	_anon_timer.set_autostart(true)
+	
+	_anon_timer.timeout.connect(_on_anon_timer_timeout)
+	add_child(_anon_timer)
+
+
+## Registers a component in the database. Returns false if it already exists. p_component must be GBC-compliant. 
+## If p_anonymous == true, the component will be removed from ObjectDB after ANON_REMOVE_TIME, unless added again with p_anonymous == false
+func register_component(p_component: Object, p_anonymous: bool = false) -> bool:
+	if not is_component_allowed(p_component):
+		return false
+	
+	if _components.has(p_component.get_uuid()):
+		if _anon_components.erase(p_component):
+			_handle_signals_added(p_component)
+		
 		return false
 	
 	_components[p_component.get_uuid()] = p_component
 	_static_components[p_component.get_uuid()] = p_component
+	
+	if not p_component.delete_requested.is_connected(deregister_component):
+		p_component.delete_requested.connect(deregister_component)
 	
 	for classname: String in p_component.get_class_tree():
 		if not classname in _components_by_classname:
 			_components_by_classname[classname] = []
 		_components_by_classname[classname].append(p_component)
 	
-	_check_component_requests(p_component)
-	_check_class_callbacks(p_component)
-	
-	p_component.delete_requested.connect(deregister_component)
-	components_added.emit([p_component])
+	if p_anonymous:
+		_anon_components[p_component] = Time.get_unix_time_from_system()
+	else:
+		_handle_signals_added(p_component)
 	
 	return true
 
@@ -77,11 +104,14 @@ func deregister_component(p_component: Object) -> bool:
 	for classname: String in p_component.get_class_tree():
 		_components_by_classname[classname].erase(p_component)
 	
-	_check_class_callbacks(p_component, true)
 	_components.erase(p_component.get_uuid())
 	
-	p_component.delete_requested.disconnect(deregister_component)
-	components_removed.emit([p_component])
+	if p_component.delete_requested.is_connected(deregister_component):
+		p_component.delete_requested.disconnect(deregister_component)
+	
+	if not _anon_components.erase(p_component):
+		_check_class_callbacks(p_component, true)
+		components_removed.emit([p_component])
 	
 	return true
 
@@ -101,9 +131,17 @@ func get_components() -> Array:
 	return _components.values()
 
 
-## Checks if the given component exists in the database. Not GBC-safe if the object lacks get_uuid().
-func has_component(p_component: Object) -> bool:
+## Returns all anonymous components
+func get_anon_components() -> Dictionary[Object, float]:
+	return _anon_components.duplicate()
+
+
+## Checks if the given component exists in the database
+func has_component(p_component: Object, p_include_anon: bool = true) -> bool:
 	if not is_component_allowed(p_component):
+		return false
+	
+	if not p_include_anon and _anon_components.has(p_component):
 		return false
 	
 	return _components.has(p_component.get_uuid())
@@ -179,6 +217,13 @@ func reset_callbacks() -> void:
 	_emit_class_callbacks_queued = false
 
 
+## Handles all signals and callbacks for when a component is added
+func _handle_signals_added(p_component: Object) -> void:
+	_check_component_requests(p_component)
+	_check_class_callbacks(p_component)
+	components_added.emit([p_component])
+
+
 ## Checks both static and local component requests and calls callbacks if needed
 func _check_component_requests(p_component: Object) -> void:
 	for requests: Dictionary[String, Array] in [_static_requests, _component_requests]: 
@@ -223,3 +268,11 @@ func _emit_class_callbacks() -> void:
 	
 	_just_changed_components.clear()
 	_emit_class_callbacks_queued = false
+
+
+## Called when the anon timer times out
+func _on_anon_timer_timeout() -> void:
+	for component: Object in _anon_components.keys():
+		if Time.get_unix_time_from_system() - _anon_components[component] >= ANON_REMOVE_TIME:
+			print("Removing anon component: ", component.get_uname())
+			component.delete()
