@@ -101,11 +101,11 @@ func print_log(p_log: String, p_level: LogLevel) -> void:
 		LogLevel.ALL:
 			print(p_log)
 		LogLevel.INFO:
-			print("INFO: ", p_log)
+			print("(", Time.get_unix_time_from_system() ,") INFO: ", p_log)
 		LogLevel.WARNING:
-			push_warning("WARNING: ", p_log)
+			push_warning("(", Time.get_unix_time_from_system() ,") WARNING: ", p_log)
 		LogLevel.ERROR:
-			push_error("ERROR: ", p_log)
+			push_error("(", Time.get_unix_time_from_system() ,") ERROR: ", p_log)
 
 
 ## Prints a new line to the log
