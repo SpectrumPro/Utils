@@ -57,6 +57,12 @@ enum NetworkFlags {
 };
 
 
+## Enum for Direction
+enum Direction {
+	FORWARDS,		## Not Backwards
+	BACKWARDS		## Not Forwards
+}
+
 ## Map custom Type to Godot Variant.Type
 var custom_type_map: Dictionary[Type, Variant.Type] = {
 	Type.NULL: 				TYPE_NIL,
@@ -143,6 +149,72 @@ func custom_type_to_string(p_variant: Variant, p_orignal_type: Type) -> String:
 		return p_variant.get_uname()
 	
 	return type_convert(p_variant, TYPE_STRING)
+
+
+## Attempts to autofill data
+func autofill_entrys(p_input: String, p_num_items: int, p_output_type: Variant.Type = TYPE_STRING, p_imbed_array: bool = true, p_min: Variant = -INF, p_max: Variant = INF) -> Array[Variant]:
+	var direction: Direction
+	
+	if p_input.ends_with("/"):
+		direction = Direction.FORWARDS
+	elif p_input.ends_with("\\"):
+		direction = Direction.BACKWARDS
+	else:
+		return [[type_convert(p_input, p_output_type)]] if p_imbed_array else [type_convert(p_input, p_output_type)] 
+	
+	var prefix: String 
+	
+	for index: int in range(p_input.length() - 2, -1, -1):
+		var character: String = p_input[index]
+		
+		if (character + prefix).is_valid_float():
+			prefix = character + prefix
+		else:
+			break
+	
+	var prefix_is_float: bool = prefix.contains(".")
+	var zero_pad_length: int = 0
+	var base_string = p_input.left(-(prefix.length() + 1))
+	
+	while prefix.begins_with("0"):
+		if prefix.length() >= 1 and prefix[1] == ".":
+			break
+		
+		prefix = prefix.right(-1)
+		zero_pad_length += 1
+	
+	var start_number: float = float(prefix)
+	var result: Array[Variant]
+	
+	for index: int in range(0, p_num_items):
+		var new_number: float = 0
+		
+		if direction == Direction.FORWARDS:
+			new_number = start_number + index
+		else:
+			new_number = start_number - index
+		
+		new_number = clamp(new_number, p_min, p_max)
+		var item_value: Variant
+		
+		match p_output_type:
+			TYPE_STRING:
+				var string_number: String = str(new_number).pad_zeros(zero_pad_length + 1)
+				
+				if not prefix_is_float:
+					string_number = str(int(string_number))
+				
+				item_value = base_string + string_number
+			
+			_:
+				item_value = type_convert(base_string + str(new_number).pad_zeros(zero_pad_length + 1), p_output_type)
+		
+		if p_imbed_array:
+			result.append([item_value])
+		else:
+			result.append(item_value)
+	
+	return result
 
 
 ## Returns the signal emitted when the name of an object is changed
