@@ -30,11 +30,16 @@ static func from(p_array: Array) -> Set:
 
 ## Adds a value to this set
 func add(p_value: Variant) -> bool:
-	if has(p_value):
+	if has(p_value) or typeof(p_value) != _type:
 		return false
 	
 	_set[p_value] = null
 	return true
+
+
+## Removes a value from this set, returns true if successful
+func remove(p_value: Variant) -> bool:
+	return _set.erase(p_value)
 
 
 ## Returns true if this Set has the given value
@@ -66,6 +71,11 @@ func get_data_type() -> int:
 ## Clears the RefMap
 func clear() -> void:
 	_set.clear()
+
+
+## Returns the size of this Set
+func size() -> int:
+	return _set.size()
 
 
 ## Returns this Set as a string
