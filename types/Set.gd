@@ -30,7 +30,7 @@ static func from(p_array: Array) -> Set:
 
 ## Adds a value to this set
 func add(p_value: Variant) -> bool:
-	if has(p_value) or typeof(p_value) != _type:
+	if has(p_value) or typeof(p_value) != _type and _type:
 		return false
 	
 	_set[p_value] = null
