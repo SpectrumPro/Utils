@@ -177,7 +177,7 @@ func autofill_entrys(p_input: String, p_num_items: int, p_output_type: Variant.T
 	var base_string = p_input.left(-(prefix.length() + 1))
 	
 	while prefix.begins_with("0"):
-		if prefix.length() >= 1 and prefix[1] == ".":
+		if prefix.length() >= 2 and prefix[1] == ".":
 			break
 		
 		prefix = prefix.right(-1)
