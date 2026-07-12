@@ -90,12 +90,15 @@ var _visual_category: String = ""
 ## The line this Module shoule be displayed when in a user interface
 var _visual_line: int = -1
 
-## The object that owns this SettingsManager
+## The object that owns this SettingsModule
 var _owner: WeakRef
+
+## The SettingsManager for this module
+var _manager: SettingsManager
 
 
 ## Init
-func _init(p_id: String, p_name: String, p_data_type: Data.Type, p_type: Type, p_setter: Callable, p_getter: Callable, p_signals: Array[Signal], p_owner: Object) -> void:
+func _init(p_id: String, p_name: String, p_data_type: Data.Type, p_type: Type, p_setter: Callable, p_getter: Callable, p_signals: Array[Signal], p_owner: Object, p_manager: SettingsManager) -> void:
 	_id = p_id
 	_name = p_name
 	_data_type = p_data_type
@@ -104,6 +107,7 @@ func _init(p_id: String, p_name: String, p_data_type: Data.Type, p_type: Type, p
 	_getter = p_getter
 	_signals = p_signals
 	_owner = weakref(p_owner)
+	_manager = p_manager
 
 
 ## Gets the value of this SettingsModule as a String
@@ -253,6 +257,11 @@ func get_owner() -> Object:
 	return _owner.get_ref()
 
 
+## Returns the SettingsManager
+func get_manager() -> SettingsManager:
+	return _manager
+
+
 ## Sets the SubType
 func set_sub_type(p_sub_type: int) -> SettingsModule:
 	_sub_type = p_sub_type
@@ -357,6 +366,11 @@ func is_editable() -> bool:
 ## Returns true of this SettingsModule is displayable in a GUI
 func is_displayable() -> bool:
 	return bool(_display_condition.call())
+
+
+## Returns true is this SettingsModule is primary
+func is_primary() -> bool:
+	return not is_instance_valid(_manager) or _manager.has_primary_module(self)
 
 
 ## Conncts the given callable to all signals

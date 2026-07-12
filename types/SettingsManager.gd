@@ -9,6 +9,12 @@ class_name SettingsManager extends RefCounted
 ## All entrys in this SettingsManager
 var _entrys: Dictionary[String, SettingsModule]
 
+## All SettingsModules marked as Primary
+var _primay_modules: Set = Set.new(TYPE_OBJECT)
+
+## The SettingsModule marked as the sort module to sort owner objects when in a list
+var _sort_module: SettingsModule
+
 ## All ChildManagers in this SettingManager, store by ID
 var _child_managers: Dictionary[String, ChildManager]
 
@@ -45,7 +51,7 @@ func register_setting(p_id: String, p_data_type: Data.Type, p_setter: Callable, 
 	if not p_id:
 		return null
 	
-	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), p_data_type, SettingsModule.Type.SETTING, p_setter, p_getter, p_signals, get_owner())
+	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), p_data_type, SettingsModule.Type.SETTING, p_setter, p_getter, p_signals, get_owner(), self)
 	
 	if _inheritance_list:
 		module.display(_inheritance_list[-1])
@@ -59,7 +65,7 @@ func register_control(p_id: String, p_data_type: Data.Type, p_setter: Callable, 
 	if not p_id:
 		return null
 	
-	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), p_data_type, SettingsModule.Type.CONTROL, p_setter, p_getter, p_signals, get_owner())
+	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), p_data_type, SettingsModule.Type.CONTROL, p_setter, p_getter, p_signals, get_owner(), self)
 	
 	if _inheritance_list:
 		module.display(_inheritance_list[-1])
@@ -73,7 +79,7 @@ func register_status(p_id: String, p_data_type: Data.Type, p_getter: Callable, p
 	if not p_id or not p_data_type or not p_getter:
 		return null
 	
-	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), p_data_type, SettingsModule.Type.STATUS, Callable(), p_getter, p_signals, get_owner())
+	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), p_data_type, SettingsModule.Type.STATUS, Callable(), p_getter, p_signals, get_owner(), self)
 	module.set_enum_dict(p_enum_dict)
 	
 	if _inheritance_list:
@@ -88,7 +94,7 @@ func register_custom_panel(p_id: String, p_panel: PackedScene, p_entry_point: St
 	if not p_id or not p_panel:
 		return null
 	
-	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), Data.Type.PACKEDSCENE, SettingsModule.Type.SETTING, Callable(), Callable(), [], get_owner())
+	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), Data.Type.PACKEDSCENE, SettingsModule.Type.SETTING, Callable(), Callable(), [], get_owner(), self)
 	module.set_custom_panel_scene(p_panel)
 	module.set_custom_panel_entry_point(p_entry_point)
 	
@@ -104,7 +110,7 @@ func require(p_id: String, p_manager: SettingsManager) -> SettingsModule:
 	if not p_manager:
 		return null
 	
-	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), Data.Type.SETTINGSMANAGER, SettingsModule.Type.SETTING, Callable(), Callable(), [], get_owner())
+	var module: SettingsModule = SettingsModule.new(p_id, p_id.capitalize(), Data.Type.SETTINGSMANAGER, SettingsModule.Type.SETTING, Callable(), Callable(), [], get_owner(), self)
 	module.set_sub_manager(p_manager)
 	
 	if _inheritance_list:
@@ -159,6 +165,26 @@ func register_networked_signals_auto(p_signals: Array[Signal]) -> void:
 func register_networked_signal(p_signals: Dictionary[String, Signal]) -> void:
 	_networked_methods.merge(p_signals, true)
 
+
+## Adds a SettingsModule to the primary modules by ID
+func add_primary_module(p_id: String) -> void:
+	var module: SettingsModule = _entrys.get(p_id)
+	
+	if not is_instance_valid(module):
+		return
+	
+	_primay_modules.add(module)
+
+
+## Removes a SettingsModule from the primary modules by ID
+func remove_primary_module(p_id: String) -> void:
+	var module: SettingsModule = _entrys.get(p_id)
+	
+	if not is_instance_valid(module):
+		return
+	
+	_primay_modules.remove(module)
+ 
 
 ## Gets an entry
 func get_entry(p_id: String) -> SettingsModule:
@@ -250,6 +276,19 @@ func get_signal_network_flags(p_signal: String) -> int:
 	return _networked_signal_flags.get(p_signal, Data.NetworkFlags.NONE)
 
 
+## Gets all the primary modules
+func get_primary_modules() -> Array[SettingsModule]:
+	var result: Array[SettingsModule]
+	
+	result.assign(_primay_modules.get_as_array())
+	return result
+
+
+## Returns the sort module
+func get_sort_module() -> SettingsModule:
+	return _sort_module
+
+
 ## Sets the owner
 func set_owner(p_owner: Object) -> void:
 	_owner = weakref(p_owner)
@@ -328,9 +367,19 @@ func set_signal_allow_serialize(p_signal: Variant) -> void:
 	set_signal_network_flags(p_signal, Data.NetworkFlags.ALLOW_SERIALIZE)
 
 
+## Sets the sort module
+func set_sort_module(p_id: String) -> void:
+	_sort_module = _entrys.get(p_id, null)
+
+
 ## Returns true if this SettingsManager has a given ChildManager
 func has_child_manager(p_manager: ChildManager) -> bool: 
 	return _child_managers.has(p_manager.get_id()) and _child_managers[p_manager.get_id()] == p_manager
+
+
+## Returns true if this SettingsManager has the given primary SettingsModule
+func has_primary_module(p_module: SettingsModule) -> bool:
+	return _primay_modules.has(p_module)
 
 
 ## Notification
