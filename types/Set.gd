@@ -58,6 +58,11 @@ func get_as_array() -> Array[Variant]:
 	return result
 
 
+## Returns the item at the given position
+func get_at(p_index: int) -> Variant:
+	return _set.keys()[p_index]
+
+
 ## Gets this RefMap as a dictonary
 func get_as_dict() -> Dictionary[Variant, Variant]:
 	return _set.duplicate()
