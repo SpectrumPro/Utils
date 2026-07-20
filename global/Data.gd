@@ -109,6 +109,8 @@ func _ready() -> void:
 	Config.load_config("res://DataConfig.gd")
 	
 	var global_class_tree: Dictionary[String, Variant]
+	global_class_tree["CoreGlobal"] = CoreGlobal
+	
 	for node: Node in get_tree().get_root().get_children():
 		if node is CoreGlobal:
 			_globals.append(node)
