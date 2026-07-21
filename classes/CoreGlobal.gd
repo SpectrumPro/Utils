@@ -35,6 +35,8 @@ func _init(p_uuid: String = "", ...p_args: Array[Variant]) -> void:
 	_settings.set_inheritance_array(_class_tree)
 	
 	_settings.register_control("Name", Data.Type.STRING, set_uname, get_uname, [name_changed])
+	_settings.register_status("Class", Data.Type.STRING, get_class_name)
+	
 	_settings.add_primary_module("Name")
 
 
