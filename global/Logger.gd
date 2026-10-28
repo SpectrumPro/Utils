@@ -9,11 +9,11 @@ class_name CoreLogger extends CoreGlobal
 ## Emitted when a normal message gets logged
 signal on_info_message(p_message: String)
 
-## Emitted when a error message gets logged
-signal on_warning_message(p_message: String, p_file: String)
+## Emitted when a warning message gets logged
+signal on_warning_message(p_message: String)
 
-## Emitted when a error message gets logged
-signal on_error_message(p_message: String, p_location: String, p_file: String, p_line: int, p_error: Error, p_stacktrace: String)
+## Emitted when an error message gets logged
+signal on_error_message(p_message: String)
 
 ## Emitted when a command is recieved over the network from a remote stream reciever
 signal on_command_recieved(p_command: String)
@@ -125,25 +125,25 @@ func info(...p_args: Array) -> void:
 
 
 ## Logs a LogLevel.WARNING message
-func warning(p_file: String, ...p_args: Array) -> void:
+func warning(...p_args: Array) -> void:
 	var as_string: String = ""
 	
 	for arg: Variant in p_args:
 		as_string += str(arg)
 	
-	print_log(" ".join([p_file, as_string]), LogLevel.WARNING)
-	on_warning_message.emit(as_string, p_file)
+	print_log(as_string, LogLevel.WARNING)
+	on_warning_message.emit(as_string)
 
 
 ## Logs a LogLevel.ERROR message
-func error(p_function: String, p_file: String, p_line: int, p_error: Error, p_stacktrace: String, ...p_args: Array,) -> void:
+func error(...p_args: Array,) -> void:
 	var as_string: String = ""
 	
 	for arg: Variant in p_args:
 		as_string += str(arg)
 	
-	print_log(" ".join([p_file, p_line, error_string(p_error), p_stacktrace, as_string]), LogLevel.ERROR)
-	on_error_message.emit(as_string, p_file, p_line, p_error, p_stacktrace)
+	print_log(as_string, LogLevel.ERROR)
+	on_error_message.emit(as_string)
 
 
 ## Adds a remote ip and port pair to stream logs to
@@ -183,16 +183,18 @@ class EngineLogger extends Logger:
 	
 	## Logs a info message
 	func _log_message(p_message: String, p_error: bool) -> void:
-		if p_error:
-			breakpoint
 		_logger.ignore_next()
-		_logger.info(p_message)
+		_logger.print_log(p_message, (
+			CoreLogger.LogLevel.ERROR 
+			if p_error else
+			CoreLogger.LogLevel.INFO
+		))
 	
 	
 	## Logs an error message
 	func _log_error(p_function: String, p_file: String, p_line: int, p_code: String, p_rationale: String, p_editor_notify: bool, p_error_type: int, p_script_backtraces: Array[ScriptBacktrace]) -> void:
 		_logger.ignore_next()
-		_logger.error(p_function, p_file, p_line, p_error_type, str(p_script_backtraces), p_code + p_rationale)
+		_logger.error(str(p_function, p_file, p_line, p_error_type, p_script_backtraces, p_code, p_rationale))
 
 
 ## Stores config for logger
